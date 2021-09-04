@@ -1,7 +1,10 @@
+import { Avatar } from 'src/avatar/entities/avatar.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -9,7 +12,7 @@ import {
 @Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
 
   @Column({ type: 'varchar', length: 100, nullable: false })
   name: string;
@@ -34,4 +37,7 @@ export class User {
     name: 'updated_at',
   })
   updatedAt: Date;
+
+  @OneToOne(() => Avatar, (avatar) => avatar.user, { cascade: ['remove'] })
+  avatar: Avatar;
 }

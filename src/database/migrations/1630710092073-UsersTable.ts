@@ -11,6 +11,7 @@ export class UsersTable1630710092073 implements MigrationInterface {
             type: 'uuid',
             isPrimary: true,
             isGenerated: true,
+            generationStrategy: 'uuid',
           },
           {
             name: 'name',
@@ -25,7 +26,7 @@ export class UsersTable1630710092073 implements MigrationInterface {
             length: '100',
           },
           {
-            name: 'create_at',
+            name: 'created_at',
             type: 'timestamp',
             isNullable: false,
             default: 'CURRENT_TIMESTAMP(6)',
