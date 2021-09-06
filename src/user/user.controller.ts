@@ -25,6 +25,11 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('create_with_avatar')
+  @ApiOperation({
+    summary: 'Create single user with avatar',
+    description:
+      'Create user with name,email,phone and image file using multipart form data.',
+  })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
