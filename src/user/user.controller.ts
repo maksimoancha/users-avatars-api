@@ -3,55 +3,26 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
-  HttpCode,
-  HttpStatus,
   UseInterceptors,
   UploadedFile,
-  Response,
   Header,
+  Query,
+  Res,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import {
-  ApiBody,
-  ApiConsumes,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { createReadStream, read } from 'fs';
-import { join } from 'path';
-import { Readable } from 'stream';
 import { UploadedFileDto } from './dto/uploaded-file.dto';
+import { GetAllUsersDto } from './dto/get-all-users.dto';
+import { GetByIdDto } from './dto/get-by-id.dto';
 
 @Controller('user')
 @ApiTags('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  @Post('create')
-  @ApiOperation({
-    summary: 'Create new user',
-    description:
-      'This action will create new user with specified params and return user' +
-      '<br/><b>Required fields</b>: name\n' +
-      '<br/><b>Optional fields</b>: email, phone',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'User entity',
-    type: User,
-  })
-  @HttpCode(HttpStatus.OK)
-  async create(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return await this.userService.create(createUserDto);
-  }
 
   @Post('create_with_avatar')
   @ApiConsumes('multipart/form-data')
@@ -72,44 +43,41 @@ export class UserController {
   })
   @UseInterceptors(FileInterceptor('file'))
   @Header('Content-type', 'application/json')
-  createWithAvatar(
+  async createWithAvatar(
     @UploadedFile('file') file: UploadedFileDto,
     @Body() createUserDto: CreateUserDto,
-    @Response() res,
-  ) {
-    console.log(file);
-    console.log(createUserDto);
-    const base64Content = file.buffer.toString('base64');
-
-    const readable = new Readable();
-    readable._read = () => {};
-    readable.push(Buffer.from(base64Content, 'base64'));
-    readable.push(null);
-
-    res.set({ 'Content-type': 'image/png' });
-    readable.pipe(res);
+  ): Promise<User> {
+    return await this.userService.createWithAvatar(createUserDto, file);
   }
 
-  @Get()
-  findAll(): unknown {
-    return this.userService.findAll();
+  @Get('get_all')
+  @ApiOperation({
+    summary: 'Get all users',
+    description: 'Get all users with pagination, sorted by created_at property',
+  })
+  getAll(@Query() params: GetAllUsersDto): Promise<User[]> {
+    return this.userService.getAll(params);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): unknown {
-    return this.userService.findOne(+id);
+  @ApiOperation({
+    summary: 'Get user by ID',
+    description: 'Get single user with avatar by user ID',
+  })
+  async findOne(@Param() params: GetByIdDto) {
+    return await this.userService.findOne(params.id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateUserDto: UpdateUserDto,
-  ): unknown {
-    return this.userService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string): unknown {
-    return this.userService.remove(+id);
+  @Get(':id/avatar')
+  @ApiOperation({
+    summary: 'Get user avatar file',
+    description: 'Find user by id and return avatar file',
+  })
+  async getAvatarFile(@Param() params: GetByIdDto, @Res() res) {
+    const { readable, mimetype } = await this.userService.getUserAvatarFile(
+      params.id,
+    );
+    res.set({ 'Content-type': mimetype });
+    readable.pipe(res);
   }
 }

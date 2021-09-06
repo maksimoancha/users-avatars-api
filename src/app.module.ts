@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 import { UserModule } from './user/user.module';
-import { DatabaseModule } from './database/database.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { getConnectionOptions } from 'typeorm';
 import { AvatarModule } from './avatar/avatar.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
     UserModule,
-    DatabaseModule,
     TypeOrmModule.forRootAsync({
       useFactory: async () =>
         Object.assign(await getConnectionOptions(), {
@@ -16,6 +15,10 @@ import { AvatarModule } from './avatar/avatar.module';
         }),
     }),
     AvatarModule,
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+      isGlobal: true,
+    }),
   ],
   controllers: [],
   providers: [],

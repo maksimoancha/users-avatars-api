@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AvatarService } from './avatar.service';
-import { AvatarController } from './avatar.controller';
+import { AvatarRepository } from './repositories/avatar.repository';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  controllers: [AvatarController],
-  providers: [AvatarService]
+  imports: [TypeOrmModule.forFeature([AvatarRepository])],
+  providers: [AvatarService],
+  exports: [AvatarService],
 })
 export class AvatarModule {}
