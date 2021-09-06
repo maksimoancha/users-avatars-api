@@ -24,39 +24,136 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Using [Nest](https://github.com/nestjs/nest) framework TypeScript as starter repository.  
+Application also use [Yarn](https://yarnpkg.com/) for installing dependencies and trigger scripts. Include Docker and docker-compose configurations for easy deployment.
+
+---
+
+---
 
 ## Installation
 
-```bash
-$ npm install
+First you need to create required configuration files for database and environment: .env and ormconfig.json  
+Repository include examples for this files in root directory.
+
+### .env example:
+
+```
+PORT=8080
+DB_PASS=password
+DB_USER=username
+DB_NAME=users-avatar-db
 ```
 
-## Running the app
+### ormconfig.json example:
+
+```
+[
+  {
+    "name": "default",
+    "type": "postgres",
+    "host": "localhost",
+    "port": 5432,
+    "username": "your_db_username",
+    "password": "your_db_password",
+    "database": "your_db_name",
+    "entities": [
+      "dist/**/*.entity{ .ts,.js}"
+    ],
+    "synchronize": false,
+    "migrations": [
+      "dist/src/database/migrations/*{.ts,.js}"
+    ],
+    "migrationsTableName": "migrations_typeorm",
+    "migrationsRun": true
+  }
+]
+```
+
+---
+
+### Hint
+
+If you're start application in docker-compose, with node.js and postgres database in containers - change postgres host from **_localhost_** to **_postgres_**
+
+---
+
+---
+
+## Setup docker deployment
+
+For build and start application use:
+
+```bash
+$ sudo docker-compose --env-file=./.env up -d --build
+```
+
+For show logs after compile use:
+
+```bash
+$ sudo docker-compose --env-file=./.env logs -f
+```
+
+---
+
+## Local deployment
+
+For install dependencies you can use both yarn and npm (preferably yarn)
+
+```bash
+$ yarn
+```
+
+### Running the app
 
 ```bash
 # development
-$ npm run start
+$ yarn start
 
 # watch mode
-$ npm run start:dev
+$ yarn start:dev
+
+# build sources
+$ yarn build
 
 # production mode
-$ npm run start:prod
+$ yarn start:prod
 ```
 
-## Test
+---
 
-```bash
-# unit tests
-$ npm run test
+---
 
-# e2e tests
-$ npm run test:e2e
+## TypeORM Migrations
 
-# test coverage
-$ npm run test:cov
+Application supports TypeORM migrations, which placed in **src/database/migrations** directory and can be created/generated/migrated with default TypeORM commands.  
+Create new migration file:
+
 ```
+npx typeorm migration:create -n CreateUsersTable -d src/database/migrations
+```
+
+Generate automaticaly migration by changes in your entities:
+
+```
+npx typeorm migration:generate -n AddColumnToUsers -d src/database/migrations
+```
+
+Migrate all pending migrates:
+
+```
+npx typeorm migration:run
+```
+
+---
+
+### Hint
+
+When starting application in container, migrations will be applied automaticaly, when building application locally it will be applied automatically too, but for better expirience, in developing you would better use manualy **migration:run** command.
+
+---
+
+---
 
 ## Support
 

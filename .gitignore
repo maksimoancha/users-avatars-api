@@ -37,3 +37,10 @@ lerna-debug.log*
 # Configuration file for TypeORM
 # Create your own file according to ...example file separated for each environment
 ormconfig.json
+# Example for required ormconfig.json file
+!ormconfig.json.example
+
+# Environment configurations
+.env
+# Exapmle for required .env file
+!.env.example
